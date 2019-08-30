@@ -2,7 +2,9 @@ from pycoin.encoding.bytes32 import from_bytes_32, to_bytes_32
 from pycoin.encoding.hash import hash160
 from pycoin.encoding.hexbytes import b2h
 from pycoin.encoding.sec import (
-    is_sec_compressed, public_pair_to_sec, sec_to_public_pair
+    is_sec_compressed,
+    public_pair_to_sec,
+    sec_to_public_pair,
 )
 from pycoin.satoshi.der import sigencode_der, sigdecode_der
 
@@ -22,7 +24,6 @@ class Key(object):
 
     @classmethod
     def make_subclass(class_, network, generator):
-
         class Key(class_):
             _network = network
             _generator = generator
@@ -43,7 +44,9 @@ class Key(object):
             this default value.
         """
         if [secret_exponent, public_pair].count(None) != 1:
-            raise ValueError("exactly one of secret_exponent or public_pair must be passed.")
+            raise ValueError(
+                "exactly one of secret_exponent or public_pair must be passed."
+            )
         self._secret_exponent = secret_exponent
         self._public_pair = public_pair
         self._is_compressed = is_compressed
@@ -51,14 +54,17 @@ class Key(object):
         self._hash160_compressed = None
 
         if self._secret_exponent is not None:
-            if self._secret_exponent < 1 \
-                    or self._secret_exponent >= self._generator.order():
+            if (
+                self._secret_exponent < 1
+                or self._secret_exponent >= self._generator.order()
+            ):
                 raise InvalidSecretExponentError()
             public_pair = self._secret_exponent * self._generator
             self._public_pair = public_pair
 
         if (None in self._public_pair) or (
-               not self._generator.contains_point(*self._public_pair)):
+            not self._generator.contains_point(*self._public_pair)
+        ):
             raise InvalidPublicPairError()
 
     @classmethod
@@ -89,7 +95,7 @@ class Key(object):
             is_compressed = self.is_compressed()
         blob = to_bytes_32(secret_exponent)
         if is_compressed:
-            blob += b'\01'
+            blob += b"\01"
         return self._network.wif_for_blob(blob)
 
     def public_pair(self):
@@ -124,7 +130,9 @@ class Key(object):
             is_compressed = self.is_compressed()
         if is_compressed:
             if self._hash160_compressed is None:
-                self._hash160_compressed = hash160(self.sec(is_compressed=is_compressed))
+                self._hash160_compressed = hash160(
+                    self.sec(is_compressed=is_compressed)
+                )
             return self._hash160_compressed
 
         if self._hash160_uncompressed is None:
@@ -138,7 +146,9 @@ class Key(object):
         """
         Return the public address representation of this key, if available.
         """
-        return self._network.address.for_p2pkh(self.hash160(is_compressed=is_compressed))
+        return self._network.address.for_p2pkh(
+            self.hash160(is_compressed=is_compressed)
+        )
 
     def as_text(self):
         """
@@ -154,7 +164,9 @@ class Key(object):
     def public_copy(self):
         if self.secret_exponent() is None:
             return self
-        return self.__class__(public_pair=self.public_pair(), is_compressed=self.is_compressed())
+        return self.__class__(
+            public_pair=self.public_pair(), is_compressed=self.is_compressed()
+        )
 
     def subkey_for_path(self, path):
         return self

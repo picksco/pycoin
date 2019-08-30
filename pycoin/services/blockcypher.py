@@ -10,11 +10,7 @@ from pycoin.networks.default import get_current_netcode
 
 class BlockcypherProvider(object):
     def __init__(self, api_key="", netcode=None):
-        NETWORK_PATHS = {
-            "BTC": "btc/main",
-            "XTN": "btc/test3",
-            "DASH": "dash/main",
-        }
+        NETWORK_PATHS = {"BTC": "btc/main", "XTN": "btc/test3", "DASH": "dash/main"}
 
         if netcode is None:
             netcode = get_current_netcode()
@@ -39,7 +35,9 @@ class BlockcypherProvider(object):
             script = h2b(txn.get("script"))
             previous_hash = h2b_rev(txn.get("tx_hash"))
             previous_index = txn.get("tx_output_n")
-            spendables.append(Tx.Spendable(coin_value, script, previous_hash, previous_index))
+            spendables.append(
+                Tx.Spendable(coin_value, script, previous_hash, previous_index)
+            )
         return spendables
 
     def tx_for_tx_hash(self, tx_hash):

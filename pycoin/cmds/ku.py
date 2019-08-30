@@ -19,11 +19,12 @@ HASH160_RE = re.compile(r"^([0-9a-fA-F]{40})$")
 def gpg_entropy():
     try:
         output = subprocess.Popen(
-            ["gpg", "--gen-random", "2", "64"], stdout=subprocess.PIPE).communicate()[0]
+            ["gpg", "--gen-random", "2", "64"], stdout=subprocess.PIPE
+        ).communicate()[0]
         return output
     except OSError:
         sys.stderr.write("warning: can't open gpg, can't use as entropy source\n")
-    return b''
+    return b""
 
 
 def get_entropy():
@@ -71,7 +72,9 @@ def create_output(item, key, network, output_key_set, subkey_path=None):
     if hasattr(key, "hwif"):
         if subkey_path:
             add_output("subkey_path", subkey_path)
-        for k, v, text in network.output_for_hwif(key.serialize(), network, subkey_path, add_output):
+        for k, v, text in network.output_for_hwif(
+            key.serialize(), network, subkey_path, add_output
+        ):
             add_output(k, v, text)
 
     secret_exponent = getattr(key, "secret_exponent", lambda: None)()
@@ -88,16 +91,16 @@ def create_output(item, key, network, output_key_set, subkey_path=None):
 
 
 def dump_output(output_dict, output_order):
-    print('')
+    print("")
     max_length = max(len(v[1]) for v in output_order)
     for key, hr_key in output_order:
-        space_padding = ' ' * (1 + max_length - len(hr_key))
+        space_padding = " " * (1 + max_length - len(hr_key))
         val = output_dict.get(key)
         if val is None:
             print(hr_key)
         else:
             if len(val) > 80:
-                val = "%s\\\n%s%s" % (val[:66], ' ' * (5 + max_length), val[66:])
+                val = "%s\\\n%s%s" % (val[:66], " " * (5 + max_length), val[66:])
             print("%s%s: %s" % (hr_key, space_padding, val))
 
 
@@ -105,40 +108,69 @@ def create_parser():
     codes = network_codes()
     parser = argparse.ArgumentParser(
         description='Crypto coin utility ku ("key utility") to show'
-        ' information about Bitcoin or other cryptocoin data structures.',
-        epilog=('Known networks codes:\n  ' +
-                ', '.join(['%s (%s)' % (i, network_for_netcode(i).full_name()) for i in codes]))
+        " information about Bitcoin or other cryptocoin data structures.",
+        epilog=(
+            "Known networks codes:\n  "
+            + ", ".join(
+                ["%s (%s)" % (i, network_for_netcode(i).full_name()) for i in codes]
+            )
+        ),
     )
-    parser.add_argument('-w', "--wallet", help='show just Bitcoin wallet key', action='store_true')
-    parser.add_argument('-W', "--wif", help='show just Bitcoin WIF', action='store_true')
-    parser.add_argument('-a', "--address", help='show just Bitcoin address', action='store_true')
     parser.add_argument(
-        '-u', "--uncompressed", help='show output in uncompressed form', action='store_true')
+        "-w", "--wallet", help="show just Bitcoin wallet key", action="store_true"
+    )
     parser.add_argument(
-        '-P', "--public", help='only show public version of wallet keys', action='store_true')
-
-    parser.add_argument('-j', "--json", help='output as JSON', action='store_true')
-
-    parser.add_argument('-b', "--brief", nargs="*", help='brief output; display a single field')
-
-    parser.add_argument('-s', "--subkey", help='subkey path (example: 0H/2/15-20)', default="")
-    parser.add_argument('-n', "--network", help='specify network', choices=codes)
+        "-W", "--wif", help="show just Bitcoin WIF", action="store_true"
+    )
     parser.add_argument(
-        "--override-network", help='override detected network type', default=None, choices=codes)
+        "-a", "--address", help="show just Bitcoin address", action="store_true"
+    )
+    parser.add_argument(
+        "-u",
+        "--uncompressed",
+        help="show output in uncompressed form",
+        action="store_true",
+    )
+    parser.add_argument(
+        "-P",
+        "--public",
+        help="only show public version of wallet keys",
+        action="store_true",
+    )
+
+    parser.add_argument("-j", "--json", help="output as JSON", action="store_true")
 
     parser.add_argument(
-        'item', nargs="*", help='a BIP0032 wallet key string;'
-        ' a WIF;'
-        ' a bitcoin address;'
-        ' an SEC (ie. a 66 hex chars starting with 02, 03 or a 130 hex chars starting with 04);'
+        "-b", "--brief", nargs="*", help="brief output; display a single field"
+    )
+
+    parser.add_argument(
+        "-s", "--subkey", help="subkey path (example: 0H/2/15-20)", default=""
+    )
+    parser.add_argument("-n", "--network", help="specify network", choices=codes)
+    parser.add_argument(
+        "--override-network",
+        help="override detected network type",
+        default=None,
+        choices=codes,
+    )
+
+    parser.add_argument(
+        "item",
+        nargs="*",
+        help="a BIP0032 wallet key string;"
+        " a WIF;"
+        " a bitcoin address;"
+        " an SEC (ie. a 66 hex chars starting with 02, 03 or a 130 hex chars starting with 04);"
         ' the literal string "create" to create a new wallet key using strong entropy sources;'
-        ' P:wallet passphrase (NOT RECOMMENDED);'
-        ' H:wallet passphrase in hex (NOT RECOMMENDED);'
-        ' E:electrum value (either a master public, master private, or initial data);'
-        ' secret_exponent (in decimal or hex);'
+        " P:wallet passphrase (NOT RECOMMENDED);"
+        " H:wallet passphrase in hex (NOT RECOMMENDED);"
+        " E:electrum value (either a master public, master private, or initial data);"
+        " secret_exponent (in decimal or hex);"
         ' x,y where x,y form a public pair (y is a number or one of the strings "even" or "odd");'
-        ' hash160 (as 40 hex characters).'
-        ' If this argument is missing, input data will be read from stdin.')
+        " hash160 (as 40 hex characters)."
+        " If this argument is missing, input data will be read from stdin.",
+    )
     return parser
 
 
@@ -155,7 +187,7 @@ def _create_bip32(network):
 
 def parse_key(item, networks):
     default_network = networks[0]
-    if item == 'create':
+    if item == "create":
         return None, _create_bip32(default_network)
 
     if HASH160_RE.match(item):
@@ -190,7 +222,9 @@ def generate_output(args, output_dict, output_order):
 
 def ku(args, parser):
     fallback_network = network_for_netcode(args.network or get_current_netcode())
-    parse_networks = [fallback_network] + [network_for_netcode(netcode) for netcode in network_codes()]
+    parse_networks = [fallback_network] + [
+        network_for_netcode(netcode) for netcode in network_codes()
+    ]
     if args.network:
         parse_networks = [network_for_netcode(args.network)]
 
@@ -201,7 +235,9 @@ def ku(args, parser):
         override_network = network_for_netcode(args.override_network)
 
     def parse_stdin():
-        return [item for item in sys.stdin.readline().strip().split(' ') if len(item) > 0]
+        return [
+            item for item in sys.stdin.readline().strip().split(" ") if len(item) > 0
+        ]
 
     output_key_set = set(args.brief or [])
     if args.wallet:
@@ -229,7 +265,9 @@ def ku(args, parser):
             if args.public:
                 key = key.public_copy()
 
-            output_dict, output_order = create_output(item, key, display_network, output_key_set)
+            output_dict, output_order = create_output(
+                item, key, display_network, output_key_set
+            )
 
             generate_output(args, output_dict, output_order)
 
@@ -240,5 +278,5 @@ def main():
     ku(args, parser)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

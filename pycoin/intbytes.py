@@ -25,10 +25,13 @@ if bytes == str:
 
     def indexbytes(buf, i):
         return ord(buf[i])
+
     int2byte = chr
 
     def byte2int(bs):
         return ord(bs[0])
+
+
 else:
     iterbytes = iter
     indexbytes = operator.getitem

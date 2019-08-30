@@ -1,4 +1,3 @@
-
 class ScriptError(Exception):
     def error_code(self):
         if len(self.args) > 1:

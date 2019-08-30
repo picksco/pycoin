@@ -57,22 +57,26 @@ class ContractAPI(object):
                 return r
             if pc1 >= len(script) or pc2 >= len(template):
                 break
-            opcode1, data1, pc1, is_ok2 = self._script_tools.scriptStreamer.get_opcode(script, pc1)
-            opcode2, data2, pc2, is_ok2 = self._script_tools.scriptStreamer.get_opcode(template, pc2)
+            opcode1, data1, pc1, is_ok2 = self._script_tools.scriptStreamer.get_opcode(
+                script, pc1
+            )
+            opcode2, data2, pc2, is_ok2 = self._script_tools.scriptStreamer.get_opcode(
+                template, pc2
+            )
             l1 = 0 if data1 is None else len(data1)
-            if data2 == b'PUBKEY':
+            if data2 == b"PUBKEY":
                 if l1 < 33 or l1 > 120:
                     break
                 r["PUBKEY_LIST"].append(data1)
-            elif data2 == b'PUBKEYHASH':
-                if l1 != 160/8:
+            elif data2 == b"PUBKEYHASH":
+                if l1 != 160 / 8:
                     break
                 r["PUBKEYHASH_LIST"].append(data1)
-            elif data2 == b'SEGWIT':
-                if l1 not in (256/8, 160/8):
+            elif data2 == b"SEGWIT":
+                if l1 not in (256 / 8, 160 / 8):
                     break
                 r["SEGWIT_LIST"].append(data1)
-            elif data2 == b'DATA':
+            elif data2 == b"DATA":
                 r["DATA_LIST"].append(data1)
             elif (opcode1, data1) != (opcode2, data2):
                 break
@@ -80,12 +84,17 @@ class ContractAPI(object):
 
     _SCRIPT_LOOKUP = dict(
         p2pk=lambda info: "%s OP_CHECKSIG" % b2h(info.get("sec")),
-        p2pkh=lambda info: "OP_DUP OP_HASH160 %s OP_EQUALVERIFY OP_CHECKSIG" % b2h(info.get("hash160")),
+        p2pkh=lambda info: "OP_DUP OP_HASH160 %s OP_EQUALVERIFY OP_CHECKSIG"
+        % b2h(info.get("hash160")),
         p2pkh_wit=lambda info: "OP_0 %s" % b2h(info.get("hash160")),
         p2sh=lambda info: "OP_HASH160 %s OP_EQUAL" % b2h(info.get("hash160")),
         p2sh_wit=lambda info: "OP_0 %s" % b2h(info.get("hash256")),
-        multisig=lambda info: "%d %s %d OP_CHECKMULTISIG" % (
-            info.get("m"), " ".join(b2h(sk) for sk in info.get("sec_keys")), len(info.get("sec_keys"))),
+        multisig=lambda info: "%d %s %d OP_CHECKMULTISIG"
+        % (
+            info.get("m"),
+            " ".join(b2h(sk) for sk in info.get("sec_keys")),
+            len(info.get("sec_keys")),
+        ),
     )
 
     def for_info(self, info):
@@ -102,7 +111,9 @@ class ContractAPI(object):
     # nulldata_push: DATA, RAW_DATA
 
     def info_for_script(self, script):
-        d = self.match("OP_DUP OP_HASH160 'PUBKEYHASH' OP_EQUALVERIFY OP_CHECKSIG", script)
+        d = self.match(
+            "OP_DUP OP_HASH160 'PUBKEYHASH' OP_EQUALVERIFY OP_CHECKSIG", script
+        )
         if d:
             return dict(type="p2pkh", hash160=d["PUBKEYHASH_LIST"][0])
 

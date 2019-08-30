@@ -15,11 +15,17 @@ from .constraints import Atom
 from .ConstraintSolver import CONSTANT, VAR, LIST, SolvingError
 
 
-DEFAULT_PLACEHOLDER_SIGNATURE = b''
+DEFAULT_PLACEHOLDER_SIGNATURE = b""
 DEFAULT_SIGNATURE_TYPE = 1
 
 
-def _find_signatures(script_blobs, generator_for_signature_type_f, signature_for_hash_type_f, max_sigs, sec_keys):
+def _find_signatures(
+    script_blobs,
+    generator_for_signature_type_f,
+    signature_for_hash_type_f,
+    max_sigs,
+    sec_keys,
+):
     signatures = []
     secs_solved = set()
     seen = 0
@@ -45,7 +51,6 @@ def _find_signatures(script_blobs, generator_for_signature_type_f, signature_for
 
 
 def hash_lookup_solver(m):
-
     def f(solved_values, **kwargs):
         the_hash = m["the_hash"]
         db = kwargs.get("hash160_lookup", {})
@@ -62,18 +67,17 @@ def hash_lookup_solver(m):
     return (f, [m["1"]], ())
 
 
-hash_lookup_solver.pattern = ('EQUAL', CONSTANT("the_hash"), ('HASH160', VAR("1")))
+hash_lookup_solver.pattern = ("EQUAL", CONSTANT("the_hash"), ("HASH160", VAR("1")))
 
 
 def constant_equality_solver(m):
-
     def f(solved_values, **kwargs):
         return {m["var"]: m["const"]}
 
     return (f, [m["var"]], ())
 
 
-constant_equality_solver.pattern = ('EQUAL', VAR("var"), CONSTANT('const'))
+constant_equality_solver.pattern = ("EQUAL", VAR("var"), CONSTANT("const"))
 
 
 def signing_solver(m):
@@ -82,15 +86,21 @@ def signing_solver(m):
         signature_hints = kwargs.get("signature_hints", [])
         generator_for_signature_type_f = kwargs["generator_for_signature_type_f"]
         signature_for_hash_type_f = m["signature_for_hash_type_f"]
-        existing_script = kwargs.get("existing_script", b'')
+        existing_script = kwargs.get("existing_script", b"")
         existing_signatures, secs_solved = _find_signatures(
-            existing_script, generator_for_signature_type_f, signature_for_hash_type_f,
-            len(m["sig_list"]), m["sec_list"])
+            existing_script,
+            generator_for_signature_type_f,
+            signature_for_hash_type_f,
+            len(m["sig_list"]),
+            m["sec_list"],
+        )
 
         sec_keys = m["sec_list"]
         signature_variables = m["sig_list"]
 
-        signature_placeholder = kwargs.get("signature_placeholder", DEFAULT_PLACEHOLDER_SIGNATURE)
+        signature_placeholder = kwargs.get(
+            "signature_placeholder", DEFAULT_PLACEHOLDER_SIGNATURE
+        )
 
         db = kwargs.get("hash160_lookup", {})
         # we reverse this enumeration to make the behaviour look like the old signer. BRAIN DAMAGE
@@ -130,11 +140,16 @@ def signing_solver(m):
                 existing_signatures.append((-1, signature_placeholder))
         existing_signatures.sort()
         return dict(zip(signature_variables, (es[-1] for es in existing_signatures)))
+
     return (f, m["sig_list"], [a for a in m["sec_list"] if isinstance(a, Atom)])
 
 
-signing_solver.pattern = ('SIGNATURES_CORRECT', LIST("sec_list"), LIST("sig_list"),
-                          CONSTANT("signature_for_hash_type_f"))
+signing_solver.pattern = (
+    "SIGNATURES_CORRECT",
+    LIST("sec_list"),
+    LIST("sig_list"),
+    CONSTANT("signature_for_hash_type_f"),
+)
 
 
 def register_all(solver):

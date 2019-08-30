@@ -1,4 +1,9 @@
-from ..encoding.sec import is_sec, public_pair_to_hash160_sec, sec_to_public_pair, EncodingError
+from ..encoding.sec import (
+    is_sec,
+    public_pair_to_hash160_sec,
+    sec_to_public_pair,
+    EncodingError,
+)
 
 from pycoin.coins.SolutionChecker import ScriptError
 from pycoin.satoshi.checksigops import parse_signature_blob
@@ -19,7 +24,12 @@ class WhoSigned(object):
         tx_context = sc.tx_context_for_idx(tx_in_idx)
         # set solution_stack in case there are no results from puzzle_and_solution_iterator
         solution_stack = []
-        for puzzle_script, solution_stack, flags, sighash_f in sc.puzzle_and_solution_iterator(tx_context):
+        for (
+            puzzle_script,
+            solution_stack,
+            flags,
+            sighash_f,
+        ) in sc.puzzle_and_solution_iterator(tx_context):
             pass
             # we only care about the last one
         for s in solution_stack:
@@ -30,11 +40,22 @@ class WhoSigned(object):
         tx_context = sc.tx_context_for_idx(tx_in_idx)
         # set solution_stack in case there are no results from puzzle_and_solution_iterator
         solution_stack = []
-        for puzzle_script, solution_stack, flags, sighash_f in sc.puzzle_and_solution_iterator(tx_context):
+        for (
+            puzzle_script,
+            solution_stack,
+            flags,
+            sighash_f,
+        ) in sc.puzzle_and_solution_iterator(tx_context):
             pass
             # we only care about the last one
 
-        vm = sc.VM(puzzle_script, tx_context, sighash_f, flags=flags, initial_stack=solution_stack[:])
+        vm = sc.VM(
+            puzzle_script,
+            tx_context,
+            sighash_f,
+            flags=flags,
+            initial_stack=solution_stack[:],
+        )
         for data in self.solution_blobs(tx, tx_in_idx):
             try:
                 sig_pair, sig_type = parse_signature_blob(data)
@@ -51,8 +72,15 @@ class WhoSigned(object):
         tx_context = sc.tx_context_for_idx(tx_in_idx)
         # set solution_stack in case there are no results from puzzle_and_solution_iterator
         solution_stack = []
-        for puzzle_script, solution_stack, flags, sighash_f in sc.puzzle_and_solution_iterator(tx_context):
-            for opcode, data, pc, new_pc in self._script_tools.get_opcodes(puzzle_script):
+        for (
+            puzzle_script,
+            solution_stack,
+            flags,
+            sighash_f,
+        ) in sc.puzzle_and_solution_iterator(tx_context):
+            for opcode, data, pc, new_pc in self._script_tools.get_opcodes(
+                puzzle_script
+            ):
                 if data and is_sec(data):
                     yield data
             for data in solution_stack:
@@ -95,6 +123,8 @@ class WhoSigned(object):
         """
         public_pair_sig_type_list = self.public_pairs_signed(tx, tx_in_idx)
         sig_type_list = [pp[-1] for pp in public_pair_sig_type_list]
-        hash160_list = [public_pair_to_hash160_sec(pp[0]) for pp in public_pair_sig_type_list]
+        hash160_list = [
+            public_pair_to_hash160_sec(pp[0]) for pp in public_pair_sig_type_list
+        ]
         address_list = [self._address.for_p2pkh(h160) for h160 in hash160_list]
         return list(zip(address_list, sig_type_list))

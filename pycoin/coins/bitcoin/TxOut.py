@@ -28,7 +28,7 @@ class TxOut(object):
         return '%s<%s mbtc "%s">' % (
             self.__class__.__name__,
             satoshi_to_mbtc(self.coin_value),
-            BitcoinScriptTools.disassemble(self.script)
+            BitcoinScriptTools.disassemble(self.script),
         )
 
     def puzzle_script(self):

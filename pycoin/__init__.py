@@ -6,8 +6,8 @@ from .version import version  # noqa
 :license: MIT, see LICENSE for more details.
 """
 
-__title__ = 'pycoin'
-__author__ = 'Richard Kiss'
+__title__ = "pycoin"
+__author__ = "Richard Kiss"
 __version__ = version
-__license__ = 'MIT'
-__copyright__ = 'Copyright 2018 Richard Kiss'
+__license__ = "MIT"
+__copyright__ = "Copyright 2018 Richard Kiss"

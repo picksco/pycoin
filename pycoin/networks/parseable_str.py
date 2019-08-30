@@ -9,6 +9,7 @@ class parseable_str(str):
     data (or really anything) to eliminate the need to repeatedly run slow parsing
     code when checking validity for multiple types.
     """
+
     def __new__(self, s):
         if isinstance(s, parseable_str):
             return s

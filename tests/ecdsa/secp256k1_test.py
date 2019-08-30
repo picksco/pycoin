@@ -210,8 +210,8 @@ y = 0xf449a8376906482a84ed01479bd18882b919c140d638307f0c0934ba12590bde
 
 class Secp256k1Test(unittest.TestCase):
     def test_multiply(self):
-        for f1 in [15, 10000, 73**38]:
-            for f2 in [2, 3, 78192, 71**39]:
+        for f1 in [15, 10000, 73 ** 38]:
+            for f2 in [2, 3, 78192, 71 ** 39]:
                 k1 = f1 * secp256k1_generator
                 k2 = (f1 * f2) * secp256k1_generator
         self.assertEqual(f2 * k1, k2)
@@ -230,7 +230,11 @@ def inject():
 
     for triplets in VECTORS.strip().split("\n\n"):
         k_line, x_line, y_line = triplets.split("\n")
-        if k_line.startswith("k = ") and x_line.startswith("x = ") and y_line.startswith("y = "):
+        if (
+            k_line.startswith("k = ")
+            and x_line.startswith("x = ")
+            and y_line.startswith("y = ")
+        ):
             if k_line[4:].startswith("0x"):
                 k = int(k_line[4:], 16)
             else:
@@ -242,6 +246,7 @@ def inject():
             def make_test(k, x, y):
                 def the_test(self):
                     self.assertEqual(k * secp256k1_generator, (x, y))
+
                 return the_test
 
             setattr(Secp256k1Test, name_of_f, make_test(k, x, y))

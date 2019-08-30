@@ -1,4 +1,3 @@
-
 import hashlib
 
 from .hexbytes import bytes_as_revhex
@@ -9,7 +8,7 @@ def ripemd160(data):
 
 
 try:
-    ripemd160(b'').digest()
+    ripemd160(b"").digest()
 except Exception:
     # stupid Google App Engine hashlib doesn't support ripemd160 for some stupid reason
     # import it from pycrypto. You need to add

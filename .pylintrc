@@ -1,0 +1,13 @@
+[MASTER]
+ignore = .git
+persistent = no
+jobs = 4
+
+[MESSAGES CONTROL]
+disable =
+    bad-continuation,   # Fixed by black
+    C0103,              # Constant name format
+    C0330,              # Fixed by black
+    fixme,              # todo/fixme/hack reminders are not errors
+    missing-docstring,  # Documentation is nice to have but not an error
+    R0201,              # No-self-use, this is okay for logical encapsulation
